@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Illuminate\Routing\Middleware\ThrottleRequests as BaseThrottler;
+
+class ThrottleRequests extends BaseThrottler
+{
+    protected function resolveRequestSignature($request)
+    {
+        if ($user = $request->user()) {
+            return sha1($user->getAuthIdentifier());
+        }
+        
+        if ($request->route()) {
+            return sha1(
+                $request->method() . '|' . $request->server('SERVER_NAME') . '|' . $request->ip()
+            );
+        }
+        
+        throw new \RuntimeException('Unable to generate the request signature. Route unavailable.');
+    }
+}
